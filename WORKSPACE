@@ -40,6 +40,12 @@ load("//tensorflow:workspace.bzl", "tf_workspace")
 # Please add all new TensorFlow dependencies in workspace.bzl.
 tf_workspace()
 
+new_local_repository(
+    name = "opencv",
+    path = "/usr/local",
+    build_file = "opencv.BUILD",
+)
+
 new_http_archive(
     name = "inception5h",
     build_file = "models.BUILD",
