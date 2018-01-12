@@ -294,7 +294,8 @@ int main(int argc, char* argv[]) {
   if (!read_labels_status.ok()) {
     LOG(ERROR) << read_labels_status;
   }
-  std::string categ;
+
+  // Config TEXT size etc.
   int fontFace = cv::FONT_HERSHEY_COMPLEX_SMALL;
   double fontScale = 1;
   int thickness = 1;
