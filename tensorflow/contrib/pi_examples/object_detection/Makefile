@@ -7,6 +7,7 @@ SCRIPT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 # The location of the tensorflow/contrib/makefile directory.
 TFMAKEFILE_DIR := $(SCRIPT_DIR)/../../makefile
 TFROOT_DIR:= $(SCRIPT_DIR)/../../../..
+LIBTF_SO := $(TFROOT_DIR)/bazel-bin/tensorflow
 
 # Where compiled objects are stored.
 GENDIR := $(SCRIPT_DIR)/gen/
@@ -55,6 +56,7 @@ CXXFLAGS := --std=c++11 $(OPTFLAGS)
 LDFLAGS := \
 -L/usr/local/lib \
 -L$(TFLIBDIR) \
+-L$(LIBTF_SO) \
 -L$(NSYNCDIR) \
 -L$(PROTOBUFGENDIR)/lib \
 -Wl,--no-whole-archive

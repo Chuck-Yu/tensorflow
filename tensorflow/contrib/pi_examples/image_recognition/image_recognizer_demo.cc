@@ -1,12 +1,12 @@
 //
 // Created by kerner on 10/17/17.
 //
-#include <stdio.h>
 #include <jpeglib.h>
 #include <setjmp.h>
+#include <stdio.h>
 #include <fstream>
-#include <vector>
 #include <iomanip>
+#include <vector>
 
 #include "image_recognizer.h"
 #include "tensorflow/core/framework/graph.pb.h"
@@ -27,23 +27,23 @@
 // Error handling for JPEG decoding.
 void CatchError(j_common_ptr cinfo) {
   (*cinfo->err->output_message)(cinfo);
-  jmp_buf *jpeg_jmpbuf = reinterpret_cast<jmp_buf *>(cinfo->client_data);
+  jmp_buf* jpeg_jmpbuf = reinterpret_cast<jmp_buf*>(cinfo->client_data);
   jpeg_destroy(cinfo);
   longjmp(*jpeg_jmpbuf, 1);
 }
 
 // Decompresses a JPEG file from disk.
-tensorflow::Status LoadJpegFile(std::string file_name, std::vector<tensorflow::uint8> *data,
-                                int *width, int *height, int *channels) {
+tensorflow::Status LoadJpegFile(std::string file_name,
+                                std::vector<tensorflow::uint8>* data,
+                                int* width, int* height, int* channels) {
   struct jpeg_decompress_struct cinfo;
-  FILE *infile;
+  FILE* infile;
   JSAMPARRAY buffer;
   int row_stride;
 
   if ((infile = fopen(file_name.c_str(), "rb")) == NULL) {
     LOG(ERROR) << "Can't open " << file_name;
-    return tensorflow::errors::NotFound("JPEG file ", file_name,
-                                        " not found");
+    return tensorflow::errors::NotFound("JPEG file ", file_name, " not found");
   }
 
   struct jpeg_error_mgr jerr;
@@ -66,10 +66,11 @@ tensorflow::Status LoadJpegFile(std::string file_name, std::vector<tensorflow::u
   data->resize((*height) * (*width) * (*channels));
 
   row_stride = cinfo.output_width * cinfo.output_components;
-  buffer = (*cinfo.mem->alloc_sarray)
-      ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
+  buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE,
+                                      row_stride, 1);
   while (cinfo.output_scanline < cinfo.output_height) {
-    tensorflow::uint8 *row_address = &((*data)[cinfo.output_scanline * row_stride]);
+    tensorflow::uint8* row_address =
+        &((*data)[cinfo.output_scanline * row_stride]);
     jpeg_read_scanlines(&cinfo, buffer, 1);
     memcpy(row_address, buffer[0], row_stride);
   }
@@ -80,16 +81,16 @@ tensorflow::Status LoadJpegFile(std::string file_name, std::vector<tensorflow::u
   return tensorflow::Status::OK();
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   std::string image =
       "tensorflow/contrib/pi_examples/label_image/data/"
-          "grace_hopper.jpg";
+      "grace_hopper.jpg";
   std::string graph =
       "tensorflow/contrib/pi_examples/label_image/data/"
-          "tensorflow_inception_stripped.pb";
+      "tensorflow_inception_stripped.pb";
   std::string labels =
       "tensorflow/contrib/pi_examples/label_image/data/"
-          "imagenet_comp_graph_label_strings.txt";
+      "imagenet_comp_graph_label_strings.txt";
   int32_t input_width = 299;
   int32_t input_height = 299;
   int32_t input_mean = 128;
@@ -101,14 +102,16 @@ int main(int argc, char *argv[]) {
       tensorflow::Flag("image", &image, "image to be processed"),
       tensorflow::Flag("graph", &graph, "graph to be executed"),
       tensorflow::Flag("labels", &labels, "name of file containing labels"),
-      tensorflow::Flag("input_width", &input_width, "resize image to this width in pixels"),
+      tensorflow::Flag("input_width", &input_width,
+                       "resize image to this width in pixels"),
       tensorflow::Flag("input_height", &input_height,
-           "resize image to this height in pixels"),
-      tensorflow::Flag("input_mean", &input_mean, "scale pixel values to this mean"),
-      tensorflow::Flag("input_std", &input_std, "scale pixel values to this std deviation"),
+                       "resize image to this height in pixels"),
+      tensorflow::Flag("input_mean", &input_mean,
+                       "scale pixel values to this mean"),
+      tensorflow::Flag("input_std", &input_std,
+                       "scale pixel values to this std deviation"),
       tensorflow::Flag("input_layer", &input_layer, "name of input layer"),
-      tensorflow::Flag("output_layer", &output_layer, "name of output layer")
-  };
+      tensorflow::Flag("output_layer", &output_layer, "name of output layer")};
   std::string usage = tensorflow::Flags::Usage(argv[0], flag_list);
   const bool parse_result = tensorflow::Flags::Parse(&argc, argv, flag_list);
   if (!parse_result) {
@@ -116,14 +119,9 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  auto imageRecognition = PI::recognition::CreateImageRecognizer(graph,
-                                                             labels,
-                                                             input_width,
-                                                             input_height,
-                                                             input_mean,
-                                                             input_std,
-                                                             input_layer,
-                                                             output_layer);
+  auto imageRecognition = PI::recognition::CreateImageRecognizer(
+      graph, labels, input_width, input_height, input_mean, input_std,
+      input_layer, output_layer);
 
   // Load image
   std::vector<tensorflow::uint8> image_data;
@@ -133,18 +131,19 @@ int main(int argc, char *argv[]) {
   std::string image_path = tensorflow::io::JoinPath("", image);
   std::cout << "image path: " << image_path << std::endl;
 
-  tensorflow::Status load_file_status = LoadJpegFile(image_path, &image_data, &image_width,
-                                                     &image_height, &image_channels);
-  std::cout << "Loaded JPEG: " << image_width << "x" << image_height
-            << "x" << image_channels << std::endl;
+  tensorflow::Status load_file_status = LoadJpegFile(
+      image_path, &image_data, &image_width, &image_height, &image_channels);
+  std::cout << "Loaded JPEG: " << image_width << "x" << image_height << "x"
+            << image_channels << std::endl;
   if (!load_file_status.ok()) {
     std::cerr << load_file_status << std::endl;
     return -1;
   }
 
   // run
-  tensorflow::uint8 *in = image_data.data();
-  auto result = imageRecognition->Recognize(in, image_width, image_height, image_channels);
+  tensorflow::uint8* in = image_data.data();
+  auto result = imageRecognition->Recognize(in, image_width, image_height,
+                                            image_channels);
   for (std::pair<std::string, float> r : result) {
     std::cout << r.first << " : " << r.second << std::endl;
   }
