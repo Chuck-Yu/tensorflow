@@ -1,12 +1,12 @@
 //
 // Created by kerner on 10/17/17.
 //
-#include <jpeglib.h>
 #include <setjmp.h>
 #include <stdio.h>
 #include <fstream>
 #include <iomanip>
 #include <vector>
+#include <jpeglib.h>
 
 #include "image_recognizer.h"
 #include "tensorflow/core/framework/graph.pb.h"

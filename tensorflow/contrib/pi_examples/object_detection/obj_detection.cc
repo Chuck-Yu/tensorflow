@@ -43,8 +43,8 @@ class ObjectDetection::Impl {
   Impl(const Parameters& params);
   ~Impl();
 
-  std::vector<std::pair<std::string, float>> Detect(
-      const std::string& file_name);
+  std::vector<Objects> Detect(const std::string& file_name,
+                              const int image_width, const int image_height);
 
  private:
   // graph to be executed
@@ -193,7 +193,7 @@ tensorflow::Status ObjectDetection::Impl::ReadTensorFromImageFile(
                               DecodeJpeg::Channels(wanted_channels));
   }
 
-  auto uint9_caster =
+  auto uint8_caster =
       Cast(root.WithOpName("uint8_caster"), image_reader, tensorflow::DT_UINT8);
 
   // The convention for image ops in TensorFlow is that all images are expected
@@ -234,11 +234,13 @@ tensorflow::Status ObjectDetection::Impl::LoadGraph(
   return tensorflow::Status::OK();
 }
 
-std::vector<std::pair<std::string, float>> ObjectDetection::Impl::Detect(
-    const std::string& file_name) {
+std::vector<ObjectDetection::Objects> ObjectDetection::Impl::Detect(
+    const std::string& file_name, const int image_width,
+    const int image_height) {
   // Get the image from disk as a float array of numbers, resized and normalized
   // to the specifications the main graph expects.
-  std::vector<std::pair<std::string, float>> det_result;
+  // std::vector<std::pair<std::string, float>> det_result;
+  std::vector<Objects> det_result;
 
   std::vector<tensorflow::Tensor> resized_tensors;
   std::string image_path = tensorflow::io::JoinPath("", file_name);
@@ -283,7 +285,9 @@ std::vector<std::pair<std::string, float>> ObjectDetection::Impl::Detect(
       // det_result.push_back(std::make_pair(str_labels[(int)(classes(i)) - 1],
       // scores(i), boxes(0,i,0), boxes(0,i,1), boxes(0,i,2), boxes(0,i,3)));
       det_result.push_back(
-          std::make_pair(str_labels[(int)(classes(i)) - 1], scores(i)));
+          {str_labels[(int)(classes(i)) - 1], scores(i),
+           boxes(0, i, 0) * image_height, boxes(0, i, 1) * image_width,
+           boxes(0, i, 2) * image_height, boxes(0, i, 3) * image_width});
     }
   }
 
@@ -314,9 +318,10 @@ ObjectDetection::ObjectDetection(const Parameters& params)
     : impl_(std::make_shared<Impl>(params)) {}
 ObjectDetection::~ObjectDetection() {}
 
-std::vector<std::pair<std::string, float>> ObjectDetection::Detect(
-    const std::string& file_name) {
-  return impl_->Detect(file_name);
+std::vector<ObjectDetection::Objects> ObjectDetection::Detect(
+    const std::string& file_name, const int image_width,
+    const int image_height) {
+  return impl_->Detect(file_name, image_width, image_height);
 }
 // ObjectDetection end
 

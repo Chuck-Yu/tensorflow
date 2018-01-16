@@ -159,7 +159,8 @@ Status ReadTensorFromImageFile(const string& file_name, const int input_height,
   // auto float_caster =
   //     Cast(root.WithOpName("float_caster"), image_reader, tensorflow::DT_FLOAT);
 
-    auto uint8_caster =  Cast(root.WithOpName("uint8_caster"), image_reader, tensorflow::DT_UINT8);
+  auto uint8_caster =
+      Cast(root.WithOpName("uint8_caster"), image_reader, tensorflow::DT_UINT8);
 
   // The convention for image ops in TensorFlow is that all images are expected
   // to be in batches, so that they're four-dimensional arrays with indices of

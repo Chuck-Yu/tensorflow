@@ -31,7 +31,6 @@ endif
 
 # The expected locations of the TensorFlow library.
 TFLIBDIR := $(TFMAKEFILE_DIR)/gen/lib
-TFLIBS := $(TFLIBDIR)/libtensorflow-core.a
 
 # Where the downloads have been stored.
 DOWNLOADSDIR := $(TFMAKEFILE_DIR)/downloads
@@ -73,7 +72,6 @@ INCLUDES := \
 LIBS := \
 -Wl,--allow-multiple-definition \
 -Wl,--whole-archive \
--ltensorflow-core \
 -ltensorflow_cc \
 -ltensorflow_framework \
 -Wl,--no-whole-archive \
@@ -100,7 +98,6 @@ DEPDIR := $(DEPDIR)android_$(ANDROID_ARCH)/
 
 # The expected locations of the TensorFlow library.
 TFLIBDIR := $(TFMAKEFILE_DIR)/gen/lib/android_$(ANDROID_ARCH)
-TFLIBS := $(TFLIBDIR)/libtensorflow-core.a
 
 # Where the downloads have been stored.
 DOWNLOADSDIR := $(TFMAKEFILE_DIR)/downloads
@@ -183,7 +180,6 @@ INCLUDES = \
 -I$(PBTGENDIR)
 
 LIBS := \
--ltensorflow-core \
 -lgnustl_static \
 -lstdc++ \
 -lprotobuf \
@@ -245,7 +241,7 @@ $(LIB_PATH): $(LIB_OBJS)
 	$(AR) $(ARFLAGS) $(LIB_PATH) $(LIB_OBJS)
 
 # Rules for target compilation.
-$(EXECUTABLE_NAME): $(EXECUTABLE_OBJS) $(LIB_PATH) $(TFLIBS) $(PROTOBUFLIBS) $(NSYNCLIBS)
+$(EXECUTABLE_NAME): $(EXECUTABLE_OBJS) $(LIB_PATH) $(PROTOBUFLIBS) $(NSYNCLIBS)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) \
 	-o $(EXECUTABLE_NAME) $(EXECUTABLE_OBJS) \

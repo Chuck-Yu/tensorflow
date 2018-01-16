@@ -43,8 +43,17 @@ class ObjectDetection {
   ObjectDetection(const Parameters& params);
   virtual ~ObjectDetection();
 
-  std::vector<std::pair<std::string, float>> Detect(
-      const std::string& file_name);
+  struct Objects {
+    std::string classes;
+    float scroes;
+    float box_top;
+    float box_left;
+    float box_bottom;
+    float box_right;
+  };
+
+  std::vector<Objects> Detect(const std::string& file_name,
+                              const int image_width, const int image_height);
 
  private:
   // PIMPL
