@@ -79,8 +79,8 @@ int main(int argc, char* argv[]) {
   // They define where the graph and input data is located, and what kind of
   // input the model expects. If you train your own model, or use something
   // other than inception_v3, then you'll need to update these.
-  std::string image(argv[1]);
-  // std::string image = "/path/to/images";
+  std::string image =
+      "tensorflow/contrib/pi_examples/object_detection/image/dog.jpg";
   std::string graph =
       "my/obj_detection/ssd_mobilenet_v1_coco_11_06_2017/"
       "frozen_inference_graph.pb";
@@ -128,8 +128,10 @@ int main(int argc, char* argv[]) {
 
   for (PI::detection::ObjectDetection::Objects obj : objects) {
     std::cout << obj.classes << ": " << obj.scroes << std::endl;
-    std::cout << obj.box_top << ": " << obj.box_left << std::endl;
-    std::cout << obj.box_bottom << ": " << obj.box_right << std::endl;
+    std::cout << "T&L: [" << obj.box_top << ", " << obj.box_left
+              << "]" << std::endl;
+    std::cout << "B&R: [" << obj.box_bottom << ", "
+              << obj.box_right << "]" << std::endl;
 
     cv::Point pt1(obj.box_top, obj.box_left);
     cv::Point pt2(obj.box_bottom, obj.box_right);
