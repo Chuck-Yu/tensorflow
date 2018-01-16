@@ -253,9 +253,9 @@ std::vector<ObjectDetection::Objects> ObjectDetection::Impl::Detect(
   }
   const tensorflow::Tensor& resized_tensor = resized_tensors[0];
 
-  LOG(INFO) << "image shape:" << resized_tensor.shape().DebugString()
-            << ",len:" << resized_tensors.size()
-            << ",tensor type:" << resized_tensor.dtype();
+  // LOG(INFO) << "image shape:" << resized_tensor.shape().DebugString()
+            // << ",len:" << resized_tensors.size()
+            // << ",tensor type:" << resized_tensor.dtype();
   // << ",data:" << resized_tensor.flat<tensorflow::uint8>();
   // Actually run the image through the model.
   std::vector<tensorflow::Tensor> outputs;
@@ -274,20 +274,18 @@ std::vector<ObjectDetection::Objects> ObjectDetection::Impl::Detect(
   tensorflow::TTypes<float>::Flat num_detections = outputs[3].flat<float>();
   auto boxes = outputs[0].flat_outer_dims<float, 3>();
 
-  LOG(INFO) << "num_detections:" << num_detections(0) << ","
-            << outputs[0].shape().DebugString();
+  // LOG(INFO) << "num_detections:" << num_detections(0) << ","
+            // << outputs[0].shape().DebugString();
 
   for (size_t i = 0; i < num_detections(0) && i < 20; ++i) {
     if (scores(i) > 0.5) {
-      LOG(INFO) << i << ",score:" << scores(i) << ",class:" << classes(i)
-                << ",box:" << boxes(0, i, 0) << "," << boxes(0, i, 1) << ","
-                << boxes(0, i, 2) << "," << boxes(0, i, 3);
-      // det_result.push_back(std::make_pair(str_labels[(int)(classes(i)) - 1],
-      // scores(i), boxes(0,i,0), boxes(0,i,1), boxes(0,i,2), boxes(0,i,3)));
+      // LOG(INFO) << i << ",score:" << scores(i) << ",class:" << classes(i)
+                // << ",box:" << boxes(0, i, 0) << "," << boxes(0, i, 1) << ","
+                // << boxes(0, i, 2) << "," << boxes(0, i, 3);
       det_result.push_back(
           {str_labels[(int)(classes(i)) - 1], scores(i),
-           boxes(0, i, 0) * image_height, boxes(0, i, 1) * image_width,
-           boxes(0, i, 2) * image_height, boxes(0, i, 3) * image_width});
+           boxes(0, i, 1) * image_width, boxes(0, i, 0) * image_height,
+           boxes(0, i, 3) * image_width, boxes(0, i, 2) * image_height});
     }
   }
 

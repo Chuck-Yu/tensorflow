@@ -12,6 +12,7 @@
 #include <jpeglib.h>
 #include "obj_detection.h"
 
+#include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -100,9 +101,9 @@ int main(int argc, char* argv[]) {
   int image_channels;
   std::cout << "image: " << image << std::endl;
 
-  // cv::Mat matImage = cv::imread(image, cv::IMREAD_COLOR);
-  // image_width = matImage.size().width;    // matImage.cols
-  // image_height = matImage.size().height;  // matImage.rows
+  cv::Mat matImage = cv::imread(image, cv::IMREAD_COLOR);
+  image_width = matImage.size().width;    // matImage.cols
+  image_height = matImage.size().height;  // matImage.rows
 
   // bool load_file_status = LoadJpegFile(image, &image_data, &image_width,
   //                                 &image_height, &image_channels);
@@ -117,52 +118,28 @@ int main(int argc, char* argv[]) {
       graph, labels, input_width, input_height, input_mean, input_std,
       input_layer, output_layer);
 
-  /*
-  int imgWidth;
-  int imgHeight;
-  // Show the images
-  cv::Mat matImage = cv::imread(image, cv::IMREAD_COLOR);
-  imgWidth = matImage.size().width;    // matImage.cols
-  imgHeight = matImage.size().height;  // matImage.rows
-  // cv::imwrite("/tmp/matImage.jpg", matImage);
-  */
+  // Config TEXT size etc.
+  int fontFace = cv::FONT_HERSHEY_COMPLEX_SMALL;
+  double fontScale = 1;
+  int thickness = 1;
 
   // Get detection results
   auto objects = objectDetection->Detect(image, image_width, image_height);
 
   for (PI::detection::ObjectDetection::Objects obj : objects) {
-     std::cout << obj.classes << ": " << obj.scroes << std::endl;
-     std::cout << obj.box_top << ": " << obj.box_left << std::endl;
-     std::cout << obj.box_bottom << ": " << obj.box_right << std::endl;
+    std::cout << obj.classes << ": " << obj.scroes << std::endl;
+    std::cout << obj.box_top << ": " << obj.box_left << std::endl;
+    std::cout << obj.box_bottom << ": " << obj.box_right << std::endl;
+
+    cv::Point pt1(obj.box_top, obj.box_left);
+    cv::Point pt2(obj.box_bottom, obj.box_right);
+    cv::rectangle(matImage, pt1, pt2, cv::Scalar(0, 255, 0), 2);
+    cv::putText(matImage, obj.classes, pt1, fontFace,
+                fontScale, cv::Scalar(255, 0, 0), thickness, 4, 0);
   }
+  cv::imshow("matImage", matImage);
 
-  /*// Config TEXT size etc.
-    int fontFace = cv::FONT_HERSHEY_COMPLEX_SMALL;
-    double fontScale = 1;
-    int thickness = 1;
+  cv::waitKey();
 
-    for(size_t i = 0; i < num_detections(0) && i < 20;++i)
-    {
-      if(scores(i) > 0.5)
-      {
-        LOG(INFO) << i << ",score:" << scores(i) << ",class:" << classes(i)<<
-    ",box:" << boxes(0,i,0) << "," << boxes(0,i,1) << "," << boxes(0,i,2)<< ","
-    << boxes(0,i,3);
-        // and its top left corner...
-        cv::Point pt1(imgWidth*boxes(0, i, 1), imgHeight*boxes(0, i, 0));
-        // and its bottom right corner.
-        cv::Point pt2(imgWidth*boxes(0, i, 3), imgHeight*boxes(0, i, 2));
-        // These two calls...
-        cv::rectangle(matImage, pt1, pt2, cv::Scalar(0, 255, 0), 2);
-
-        cv::putText(matImage, str_labels[(int)(classes(i)) - 1], pt1, fontFace,
-    fontScale, cv::Scalar(255, 0, 0), thickness, 4, 0);
-      }
-    }
-
-    cv::imshow("matImage", matImage);
-
-    cv::waitKey();
-  */
   return 0;
 }

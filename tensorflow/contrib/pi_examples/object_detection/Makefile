@@ -74,6 +74,7 @@ LIBS := \
 -Wl,--whole-archive \
 -ltensorflow_cc \
 -ltensorflow_framework \
+-lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs \
 -Wl,--no-whole-archive \
 -lstdc++ \
 -lprotobuf \
